@@ -27,39 +27,52 @@ let addEnvironment = (url, color) => {
 }
 
 let randomDefaultColor = () => {
-  let flatColors = ['#0a84ff', '#00feff', '#ff1ad9', '#30e60b', '#ffe900', '#ff0039', '#9400ff', '#ff9400', '#363959', '#737373']
-  return flatColors[Math.floor(Math.random() * flatColors.length)]
+  const FLAT_COLORS = [
+    '#0a84ff',
+    '#00feff',
+    '#ff1ad9',
+    '#30e60b',
+    '#ffe900',
+    '#ff0039',
+    '#9400ff',
+    '#ff9400',
+    '#363959',
+    '#737373'
+  ]
+  return FLAT_COLORS[Math.floor(Math.random() * FLAT_COLORS.length)]
 }
 
-let removeEnvironment = section => {
-  section.remove()
-}
+let removeEnvironment = section => section.remove()
 
 let updateEnvironments = () => {
   let environments = {}
-  for (let el of listEnvironments.children) {
+  listEnvironments.children.forEach(el => {
     let url = el.querySelector('input[type=text]').value
-    if (!url) {
-      continue
-    }
+    if (!url) return
     environments[url] = el.querySelector('input[type=color]').value
-  }
-  browser.storage.sync.set({ 'environments': environments }).catch(err => {
-    btnAddEnv.setCustomValidity('Could not save your environments')
-    btnAddEnv.reportValidity()
   })
+
+  browser.storage
+    .sync
+    .set({ 'environments': environments })
+    .catch(err => {
+      btnAddEnv.setCustomValidity('Could not save your environments')
+      btnAddEnv.reportValidity()
+    })
 }
 
 btnAddEnv.addEventListener('click', () => { addEnvironment() }, false)
 btnSaveEnv.addEventListener('click', updateEnvironments, false)
 
 document.addEventListener('DOMContentLoaded', () => {
-  browser.storage.sync.get('environments')
+  browser.storage
+    .sync
+    .get('environments')
     .then(results => {
       let { environments } = results
-      Object.keys(environments).map(value => {
-        addEnvironment(value, environments[value])
-      })
+      Object
+        .keys(environments)
+        .forEach(value => addEnvironment(value, environments[value]))
     })
     .catch(err => {
       btnAddEnv.setCustomValidity('Could not load your environments')
